@@ -1,6 +1,7 @@
 # Stickman Brawl
 
-Simple multiplayer stickman fighting game for up to 6 players. No backend — one player hosts, others join with a room code, gameplay runs browser-to-browser over WebRTC.
+A simple 6-player stickman fighting game with room codes and peer-to-peer WebRTC multiplayer. 
+Important - No need for backend.
 
 ## Features
 
