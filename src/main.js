@@ -613,3 +613,10 @@ document.getElementById('btnLeaveResults').addEventListener('click', returnToMai
 refreshWeaponChips();
 refreshAvatarPreview();
 refreshKillTargetChoices();
+
+// here, so fade out the initial loading screen and remove it.
+const appLoader = document.getElementById('app-loader');
+if (appLoader) {
+  appLoader.classList.add('hide');
+  setTimeout(() => appLoader.remove(), 400);
+}
