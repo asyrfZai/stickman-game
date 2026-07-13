@@ -23,7 +23,6 @@ dist-ssr
 *.sln
 *.sw?
 
-# AI tools (Claude Code is the only AI assistant used on this project)
 .claude/
 CLAUDE.md
 CLAUDE.local.md
