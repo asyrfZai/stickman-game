@@ -1,0 +1,1115 @@
+:root {
+  --bg: #14151c;
+  --panel: #1e2029;
+  --panel-border: #33364a;
+  --text: #d8d9e0;
+  --text-dim: #8a8d9c;
+  --accent: #6ee7ff;
+  --accent-strong: #3ad0ff;
+  --accent-orange: #ff8a3d;
+  --danger: #ff6b6b;
+  --success: #52d67a;
+  --metal-1: #2a2c38;
+  --metal-2: #1a1b23;
+  --carbon: #0d0e13;
+  font: 16px/1.5 system-ui, 'Segoe UI', Roboto, sans-serif;
+  color-scheme: dark;
+  color: var(--text);
+  background: var(--bg);
+}
+
+* { box-sizing: border-box; }
+
+html {
+  /* Stops iOS/Android pull-to-refresh and rubber-band overscroll from
+     fighting with touch-drag aiming during play. */
+  overscroll-behavior: none;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overscroll-behavior: none;
+}
+
+/* While actually playing on mobile, the whole page shouldn't scroll/zoom —
+   the canvas and touch buttons already consume all gestures deliberately. */
+html.is-mobile body:has(#screen-game.active) {
+  overflow: hidden;
+  touch-action: none;
+}
+
+#app {
+  width: 100%;
+  max-width: 1000px;
+  padding: 24px;
+  text-align: center;
+}
+
+h1 {
+  font-size: 40px;
+  letter-spacing: 4px;
+  margin: 8px 0 0;
+  color: var(--accent);
+}
+
+h2 {
+  font-size: 24px;
+  margin: 0 0 16px;
+}
+
+.subtitle {
+  color: var(--text-dim);
+  margin-bottom: 24px;
+}
+
+.screen { display: none; }
+.screen.active { display: block; }
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: 12px;
+  padding: 24px;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.setup-layout {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+}
+
+.avatar-preview-box {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+#avatarPreview {
+  background: #101117;
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+}
+
+.avatar-caption {
+  font-size: 12px;
+  color: var(--text-dim);
+}
+
+.setup-fields {
+  flex: 1;
+  min-width: 0;
+}
+
+.field {
+  display: block;
+  margin-bottom: 18px;
+  text-align: left;
+}
+
+.field-label {
+  display: block;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-dim);
+  margin-bottom: 8px;
+}
+
+input[type="text"] {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--panel-border);
+  background: #101117;
+  color: var(--text);
+  font-size: 16px;
+}
+
+.choice-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.choice-chip {
+  padding: 8px 14px;
+  border-radius: 20px;
+  border: 1px solid var(--panel-border);
+  background: #101117;
+  color: var(--text);
+  cursor: pointer;
+  font-size: 14px;
+  user-select: none;
+}
+
+.choice-chip.selected {
+  border-color: var(--accent);
+  background: rgba(110, 231, 255, 0.15);
+  color: var(--accent);
+}
+
+.choice-chip.disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.arena-field {
+  max-width: 480px;
+  margin: 0 auto 16px;
+}
+
+.arena-swatch {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+
+#arenaChoices.readonly .arena-chip,
+#killTargetChoices.readonly .arena-chip {
+  cursor: default;
+  pointer-events: none;
+}
+
+/* ---- Results screen ---- */
+.results-standings {
+  list-style: none;
+  padding: 0;
+  max-width: 420px;
+  margin: 0 auto 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.results-standings li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--panel-border);
+  background: var(--panel);
+  text-align: left;
+}
+
+.results-standings li.winner {
+  border-color: var(--accent);
+  box-shadow: 0 0 12px rgba(110, 231, 255, 0.25);
+}
+
+.results-standings .rs-rank {
+  font-weight: 700;
+  color: var(--text-dim);
+  width: 20px;
+}
+
+.results-standings .rs-name {
+  flex: 1;
+  font-weight: 600;
+}
+
+.results-standings .rs-kd {
+  color: var(--text-dim);
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- Weapon loadout cards ---- */
+.weapon-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 10px;
+}
+
+.weapon-card {
+  position: relative;
+  overflow: hidden;
+  text-align: left;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #3a3d4d;
+  background:
+    repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.015) 0 2px, transparent 2px 4px),
+    linear-gradient(160deg, var(--metal-1), var(--carbon));
+  color: var(--text);
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s;
+}
+
+.weapon-card:hover {
+  transform: translateY(-1px);
+  border-color: #565a70;
+}
+
+.weapon-card::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -60%;
+  width: 40%;
+  height: 100%;
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.12), transparent);
+  transform: skewX(-20deg);
+  transition: left 0.5s ease;
+  pointer-events: none;
+}
+
+.weapon-card:hover::after {
+  left: 130%;
+}
+
+.weapon-card.disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.weapon-card.selected[data-slot="0"] {
+  border-color: var(--accent-strong);
+  box-shadow: 0 0 0 1px rgba(58, 208, 255, 0.4), 0 0 14px rgba(58, 208, 255, 0.35);
+}
+
+.weapon-card.selected[data-slot="1"] {
+  border-color: var(--accent-orange);
+  box-shadow: 0 0 0 1px rgba(255, 138, 61, 0.4), 0 0 14px rgba(255, 138, 61, 0.35);
+}
+
+.weapon-card.selected[data-slot="2"] {
+  border-color: var(--success);
+  box-shadow: 0 0 0 1px rgba(82, 214, 122, 0.4), 0 0 14px rgba(82, 214, 122, 0.35);
+}
+
+.wc-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 6px;
+}
+
+.wc-name {
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.wc-class {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-dim);
+}
+
+.wc-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.wc-stat {
+  display: grid;
+  grid-template-columns: 30px 1fr;
+  align-items: center;
+  gap: 6px;
+}
+
+.wc-stat label {
+  font-size: 9px;
+  color: var(--text-dim);
+  letter-spacing: 0.5px;
+}
+
+.wc-bar {
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+
+.wc-bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--accent-strong), var(--accent));
+}
+
+.wc-badge {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  font-size: 10px;
+  font-weight: 700;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent-strong);
+  color: #0a0b10;
+}
+
+.weapon-card[data-slot="1"] .wc-badge {
+  background: var(--accent-orange);
+}
+
+.weapon-card[data-slot="2"] .wc-badge {
+  background: var(--success);
+}
+
+.button-row {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.btn {
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: 1px solid var(--panel-border);
+  background: #262838;
+  color: var(--text);
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.btn:hover { border-color: var(--accent); }
+.btn.primary {
+  background: var(--accent);
+  color: #0a0b10;
+  border-color: var(--accent);
+  font-weight: 600;
+}
+.btn.danger { border-color: var(--danger); color: var(--danger); background: transparent; }
+.btn.small { padding: 6px 12px; font-size: 13px; }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.join-box {
+  display: flex;
+  gap: 8px;
+  margin-top: 14px;
+  justify-content: center;
+}
+.join-box input { max-width: 180px; text-transform: uppercase; letter-spacing: 2px; text-align: center; }
+
+.hidden { display: none !important; }
+
+.error {
+  color: var(--danger);
+  min-height: 20px;
+  margin-top: 12px;
+  font-size: 14px;
+}
+
+.hint {
+  color: var(--text-dim);
+  font-size: 13px;
+  margin-top: 10px;
+}
+
+.room-code-box {
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: 10px;
+  padding: 14px 20px;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 18px;
+  margin-bottom: 20px;
+}
+
+#roomCodeDisplay {
+  font-weight: 700;
+  letter-spacing: 4px;
+  color: var(--accent);
+}
+
+.lobby-list {
+  list-style: none;
+  padding: 0;
+  max-width: 480px;
+  margin: 0 auto 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.lobby-list li {
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-align: left;
+  font-size: 14px;
+}
+
+.lobby-list .mini-avatar {
+  background: #101117;
+  border: 1px solid var(--panel-border);
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+.lobby-list .p-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+}
+
+.lobby-list .p-name { font-weight: 600; }
+.lobby-list .p-loadout { color: var(--text-dim); }
+
+#hud {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 960px;
+  margin: 0 auto 8px;
+  gap: 12px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid #3a3d4d;
+  background: linear-gradient(160deg, var(--metal-1), var(--carbon));
+}
+
+.hud-timer {
+  font-family: 'Courier New', monospace;
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: 1px;
+  color: var(--accent);
+  padding: 2px 10px;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.35);
+}
+
+/* Fullscreen toggle is only useful on mobile — desktop already has easy
+   OS/browser-level fullscreen (F11 etc). */
+#btnFullscreen {
+  display: none;
+}
+
+html.is-mobile #btnFullscreen {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  line-height: 1;
+}
+
+#scoreboard {
+  display: flex;
+  gap: 16px;
+  font-size: 13px;
+  color: var(--text-dim);
+}
+
+#scoreboard .score-entry {
+  color: var(--text);
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+#phaser-stage {
+  position: relative;
+  margin: 0 auto;
+  width: 960px;
+  max-width: 100%;
+  aspect-ratio: 960 / 540;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--panel-border);
+  background: #1b1c24;
+  line-height: 0;
+}
+
+#phaser-container {
+  width: 100%;
+  height: 100%;
+}
+
+#phaser-container canvas {
+  cursor: none;
+}
+
+/* ---- Bottom-left local HP panel ---- */
+.local-hud-panel {
+  position: absolute;
+  left: 12px;
+  bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px 6px 8px;
+  border-radius: 6px;
+  border: 1px solid #3a3d4d;
+  background: linear-gradient(160deg, rgba(42, 44, 56, 0.92), rgba(13, 14, 19, 0.92));
+  z-index: 5;
+}
+
+.lhp-icon {
+  width: 16px;
+  height: 16px;
+  border-radius: 3px;
+  background: var(--pcolor, var(--accent));
+  box-shadow: 0 0 6px var(--pcolor, transparent);
+  flex-shrink: 0;
+}
+
+.lhp-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 110px;
+}
+
+.lhp-name {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.lhp-bar {
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+}
+
+.lhp-bar-fill {
+  height: 100%;
+  width: 100%;
+  border-radius: 3px;
+  background: var(--success);
+  transition: width 0.15s linear, background 0.15s;
+}
+
+/* ---- Kill feed (top-right) ---- */
+.kill-feed {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  z-index: 5;
+  pointer-events: none;
+}
+
+.kill-feed li {
+  font-size: 12px;
+  color: var(--text);
+  padding: 4px 10px;
+  border-radius: 4px;
+  border: 1px solid #3a3d4d;
+  background: rgba(13, 14, 19, 0.85);
+  animation: kf-in 0.2s ease-out, kf-out 0.4s ease-in forwards 3.6s;
+}
+
+.kill-feed .kf-attacker { color: var(--accent-strong); font-weight: 600; }
+.kill-feed .kf-target { color: var(--danger); font-weight: 600; }
+
+@keyframes kf-in {
+  from { opacity: 0; transform: translateX(12px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes kf-out {
+  to { opacity: 0; }
+}
+
+/* ---- Center hit marker + kill banner ---- */
+.hit-marker {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 22px;
+  height: 22px;
+  transform: translate(-50%, -50%) scale(0.6);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 6;
+}
+
+.hit-marker::before,
+.hit-marker::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  height: 2px;
+  background: var(--accent-strong);
+  transform-origin: center;
+}
+.hit-marker::before { transform: translate(-50%, -50%) rotate(45deg); }
+.hit-marker::after { transform: translate(-50%, -50%) rotate(-45deg); }
+
+.hit-marker.show {
+  animation: hit-pop 0.3s ease-out;
+}
+@keyframes hit-pop {
+  0% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(1.4); }
+}
+
+.kill-banner {
+  position: absolute;
+  top: 22%;
+  left: 50%;
+  transform: translate(-50%, -8px);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: var(--danger);
+  text-transform: uppercase;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 6;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+}
+
+.kill-banner.show {
+  animation: kill-banner-pop 1.6s ease-out;
+}
+@keyframes kill-banner-pop {
+  0% { opacity: 0; transform: translate(-50%, 0); }
+  15% { opacity: 1; transform: translate(-50%, -8px); }
+  80% { opacity: 1; transform: translate(-50%, -8px); }
+  100% { opacity: 0; transform: translate(-50%, -14px); }
+}
+
+/* ---- In-game weapon HUD ---- */
+.weapon-hud {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  display: flex;
+  gap: 8px;
+  z-index: 5;
+}
+
+.whud-slot {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px 6px 8px;
+  border-radius: 6px;
+  border: 1px solid #3a3d4d;
+  background: linear-gradient(160deg, rgba(42, 44, 56, 0.92), rgba(13, 14, 19, 0.92));
+  opacity: 0.55;
+  transition: opacity 0.2s, border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+}
+
+.whud-slot.active {
+  opacity: 1;
+  border-color: var(--accent-strong);
+  box-shadow: 0 0 10px rgba(58, 208, 255, 0.4);
+  transform: translateY(-2px);
+}
+
+.whud-slot.active.ready {
+  border-color: var(--success);
+  box-shadow: 0 0 10px rgba(82, 214, 122, 0.45);
+}
+
+.whud-icon {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  background: var(--wcolor, #999);
+  box-shadow: 0 0 6px var(--wcolor, transparent);
+  flex-shrink: 0;
+}
+
+.whud-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 64px;
+}
+
+.whud-name {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: 0.3px;
+}
+
+.whud-bar {
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+}
+
+.whud-bar-fill {
+  height: 100%;
+  width: 0%;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--accent-orange), var(--accent-orange));
+  transition: width 0.08s linear, background 0.15s;
+}
+
+.whud-slot.ready .whud-bar-fill {
+  background: linear-gradient(90deg, var(--accent-strong), var(--success));
+}
+
+.controls-hint {
+  color: var(--text-dim);
+  font-size: 13px;
+  margin-top: 10px;
+}
+
+/* Mobile game screen layout. THE BUG THIS FIXES: #phaser-stage used to be
+   sized by WIDTH (width:960px capped at 100%, height derived from that via
+   aspect-ratio). Real phones in landscape are much more elongated than
+   960:540 (16:9) — e.g. ~19-21:9 — so deriving height from the full
+   available width produced a box TALLER than the actual viewport, pushing
+   the bottom-anchored touch buttons off the bottom of the screen entirely.
+   Fix: make #screen-game a flex column with a definite height, so
+   #phaser-stage (flex:1) is bounded by whatever height actually remains
+   after the HUD row, and can pick a width via aspect-ratio + max-width
+   *and* max-height together (same trick a responsive <img> uses) — i.e.
+   bounded by both dimensions, never just one. */
+html.is-mobile #app {
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  height: 100dvh; /* dvh tracks the current browser-chrome-adjusted viewport, avoiding jumps as it shows/hides */
+  max-width: 100%;
+}
+
+html.is-mobile #screen-game.active {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  padding-top: calc(6px + env(safe-area-inset-top));
+  padding-bottom: calc(6px + env(safe-area-inset-bottom));
+}
+
+html.is-mobile #screen-game.active #hud {
+  flex-shrink: 0;
+}
+
+/* .game-body is the row below the HUD: a fixed-width control column on each
+   side (see .mc-col below) with #phaser-stage taking whatever width is left
+   over between them. Controls live in their own reserved space rather than
+   floating on top of the canvas, so they can never cover the arena — and
+   the arena's max-width already excludes the columns' width, so it can
+   never be sized larger than what's actually left over for it either. */
+html.is-mobile .game-body {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+}
+
+html.is-mobile #screen-game.active #phaser-stage {
+  /* Deliberately NOT using aspect-ratio here (unlike the base rule) — this
+     box just fills whatever space flex-grow leaves between the two fixed
+     columns, at any width/ratio. Phaser's own Scale.FIT + CENTER_BOTH (see
+     main.js) already letterboxes the 960x540 canvas to fit *inside* this
+     box while preserving 16:9 — fighting that with a second, CSS-level
+     aspect-ratio on the container itself is what caused the stage to
+     collapse to ~0px (width:auto + height:auto + aspect-ratio is a
+     circular reference once the parent doesn't stretch the cross-axis)
+     and, once patched to a fixed height, to squash out of ratio on
+     narrower screens instead. Let flexbox own the box; let Phaser own the
+     letterboxing inside it. */
+  flex: 1 1 auto;
+  min-width: 0;
+  width: auto;
+  height: 100%;
+  aspect-ratio: auto;
+  max-width: none;
+  margin: 0;
+}
+
+/* Fullscreen goes further: the HUD floats as a translucent overlay instead
+   of taking its own row, so #phaser-stage gets literally the whole screen
+   rather than "screen minus a HUD row". Leave/Fullscreen stay reachable —
+   floating, not hidden. */
+html:fullscreen #app {
+  padding: 0;
+}
+
+html:fullscreen #screen-game.active {
+  padding: 0;
+}
+
+html:fullscreen #screen-game.active #phaser-stage {
+  border: none;
+  border-radius: 0;
+}
+
+html:fullscreen #screen-game.active #hud {
+  position: absolute;
+  top: calc(8px + env(safe-area-inset-top));
+  left: calc(8px + env(safe-area-inset-left));
+  right: calc(8px + env(safe-area-inset-right));
+  z-index: 20;
+  max-width: none;
+  margin: 0;
+  background: rgba(13, 14, 19, 0.6);
+  backdrop-filter: blur(6px);
+}
+
+/* ---- Mobile touch controls ----
+   .mc-col-left/.mc-col-right are normal flex-column children of .game-body
+   (see above) — reserved side columns, not an overlay on the canvas, so
+   they physically cannot cover the arena. Hidden entirely on desktop. */
+.mc-col {
+  display: none;
+}
+
+html.is-mobile .mc-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  flex-shrink: 0;
+  height: 100%;
+}
+
+.mc-col-left {
+  width: 150px;
+  gap: 12px; /* 3 stacked items (aim pad, move row, dash) vs the right column's 3 — a bit tighter to fit the same short screens comfortably */
+}
+
+.mc-col-right {
+  width: 100px;
+  gap: 14px;
+}
+
+.mc-move-row {
+  display: flex;
+  gap: 18px;
+}
+
+/* Drag-to-aim target pad. Pairs aiming with the left thumb, which only
+   otherwise handles two flat move buttons, rather than crowding the right
+   column's switch/jump/fire stack. */
+.mc-aim {
+  position: relative;
+  width: 118px;
+  height: 118px;
+  flex-shrink: 0;
+  transition: filter 0.1s;
+}
+
+.mc-aim.dragging {
+  filter: drop-shadow(0 0 10px rgba(110, 231, 255, 0.35));
+}
+
+.mc-aim-base {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: rgba(20, 21, 28, 0.42);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.1s;
+}
+
+.mc-aim.dragging .mc-aim-base {
+  border-color: var(--accent);
+}
+
+.mc-aim-hint {
+  color: rgba(255, 255, 255, 0.3);
+  font-size: 22px;
+  user-select: none;
+}
+
+.mc-aim-knob {
+  position: absolute;
+  top: 35px;
+  left: 35px;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(110, 231, 255, 0.32);
+  border: 1px solid var(--accent);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  touch-action: none;
+  transition: background 0.1s, border-color 0.1s;
+}
+
+.mc-aim-knob.active {
+  background: rgba(110, 231, 255, 0.6);
+  border-color: var(--accent-strong);
+  box-shadow: 0 0 10px rgba(110, 231, 255, 0.5);
+}
+
+.mc-btn {
+  width: 62px;
+  height: 62px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(20, 21, 28, 0.6);
+  color: var(--text);
+  font-size: 19px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  touch-action: none;
+  -webkit-tap-highlight-color: transparent;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  transition: transform 0.08s ease, background 0.15s, border-color 0.15s, box-shadow 0.15s;
+}
+
+.mc-btn:active {
+  transform: scale(0.85);
+  background: rgba(110, 231, 255, 0.38);
+  border-color: var(--accent);
+  box-shadow: 0 0 14px rgba(110, 231, 255, 0.45);
+}
+
+.mc-btn.mc-fire {
+  width: 80px;
+  height: 80px;
+  font-size: 14px;
+  background: rgba(255, 107, 107, 0.4);
+  border-color: rgba(255, 107, 107, 0.65);
+}
+
+.mc-btn.mc-fire:active {
+  background: rgba(255, 107, 107, 0.65);
+  border-color: #ff6b6b;
+  box-shadow: 0 0 16px rgba(255, 107, 107, 0.55);
+}
+
+.mc-btn.mc-jump {
+  width: 58px;
+  height: 58px;
+  font-size: 22px;
+}
+
+.mc-btn.mc-switch {
+  width: 48px;
+  height: 48px;
+  font-size: 11px;
+  opacity: 0.85;
+}
+
+.mc-btn.mc-dash {
+  width: 52px;
+  height: 52px;
+  font-size: 11px;
+  background: rgba(110, 231, 255, 0.18);
+  border-color: rgba(110, 231, 255, 0.45);
+}
+
+.mc-btn.mc-dash:active {
+  background: rgba(110, 231, 255, 0.45);
+}
+
+/* Hide desktop-only hint text on mobile — the touch buttons speak for themselves. */
+html.is-mobile .controls-hint {
+  display: none;
+}
+
+/* The corner HUD panels were designed for desktop's bottom corners, which
+   the touch clusters now occupy — move them to the top on mobile instead
+   of overlapping the buttons. Kill feed shifts to top-center to stay clear
+   of both.
+
+   These are `position: fixed` (viewport-relative), NOT positioned relative
+   to #phaser-stage, deliberately: on a short/narrow phone screen the stage
+   itself shrinks (it's letterboxed to fit both width and height), and if
+   these panels were anchored to the *stage's* top while the touch controls
+   are anchored to the stage's *bottom*, a small enough stage lets both
+   sides close in on each other and overlap in the middle. Fixing them to
+   the viewport instead makes their position independent of stage size —
+   they just sit right below the #hud bar, always, regardless of how big
+   or small the canvas ends up being. */
+html.is-mobile .local-hud-panel {
+  position: fixed;
+  top: calc(70px + env(safe-area-inset-top));
+  left: calc(10px + env(safe-area-inset-left));
+  bottom: auto;
+}
+
+html.is-mobile .weapon-hud {
+  position: fixed;
+  top: calc(70px + env(safe-area-inset-top));
+  right: calc(10px + env(safe-area-inset-right));
+  bottom: auto;
+}
+
+html.is-mobile .kill-feed {
+  position: fixed;
+  top: calc(70px + env(safe-area-inset-top));
+  left: 50%;
+  right: auto;
+  transform: translateX(-50%);
+  align-items: center;
+}
+
+/* ---- Rotate-to-landscape prompt ---- */
+.rotate-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  background: var(--bg);
+  text-align: center;
+  padding: 24px;
+}
+
+.rotate-icon {
+  font-size: 48px;
+  color: var(--accent);
+  animation: rotate-hint 1.6s ease-in-out infinite;
+}
+
+@keyframes rotate-hint {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(-90deg); }
+}
+
+@media (max-width: 900px) and (orientation: portrait) {
+  html.is-mobile #screen-game.active #hud,
+  html.is-mobile #screen-game.active #phaser-stage,
+  html.is-mobile #screen-game.active .controls-hint {
+    display: none;
+  }
+  html.is-mobile #screen-game.active .rotate-overlay {
+    display: flex;
+  }
+}

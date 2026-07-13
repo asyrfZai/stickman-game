@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+    />
+    <title>Stickman Brawl</title>
+  </head>
+  <body>
+    <div id="app">
+      <!-- MAIN MENU -->
+      <section id="screen-main" class="screen active">
+        <h1>STICKMAN BRAWL</h1>
+        <p class="subtitle">Peer-to-peer, up to 6 players. No backend server.</p>
+
+        <div class="panel">
+          <div class="setup-layout">
+            <div class="avatar-preview-box">
+              <canvas id="avatarPreview" width="140" height="180"></canvas>
+              <span class="avatar-caption">Your Stickman</span>
+            </div>
+
+            <div class="setup-fields">
+              <label class="field">
+                <span class="field-label">Your Name</span>
+                <input id="playerName" type="text" maxlength="12" placeholder="Player" />
+              </label>
+
+              <div class="field">
+                <span class="field-label">Size</span>
+                <div id="sizeChoices" class="choice-row"></div>
+              </div>
+
+              <div class="field">
+                <span class="field-label" id="weaponFieldLabel">Weapons</span>
+                <div id="weaponChoices" class="choice-row"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="button-row">
+            <button id="btnHost" class="btn primary">Host Room</button>
+            <button id="btnShowJoin" class="btn">Join Room</button>
+          </div>
+
+          <div id="joinBox" class="join-box hidden">
+            <input id="joinCode" type="text" maxlength="6" placeholder="ROOM CODE" autocapitalize="characters" />
+            <button id="btnJoin" class="btn primary">Connect</button>
+          </div>
+
+          <p id="mainError" class="error"></p>
+        </div>
+      </section>
+
+      <!-- LOBBY -->
+      <section id="screen-lobby" class="screen">
+        <h2>Lobby</h2>
+        <div class="room-code-box">
+          Room Code: <span id="roomCodeDisplay">------</span>
+          <button id="btnCopyCode" class="btn small">Copy</button>
+        </div>
+        <div class="field arena-field">
+          <span class="field-label" id="arenaFieldLabel">Arena</span>
+          <div id="arenaChoices" class="choice-row"></div>
+        </div>
+        <div class="field arena-field">
+          <span class="field-label">First to (kills)</span>
+          <div id="killTargetChoices" class="choice-row"></div>
+        </div>
+        <ul id="lobbyList" class="lobby-list"></ul>
+        <div class="button-row">
+          <button id="btnStartGame" class="btn primary hidden">Start Game</button>
+          <button id="btnLeaveLobby" class="btn danger">Leave</button>
+        </div>
+        <p id="lobbyHint" class="hint"></p>
+      </section>
+
+      <!-- GAME -->
+      <section id="screen-game" class="screen">
+        <div id="hud">
+          <div class="hud-timer" id="matchTimer">00:00</div>
+          <div id="scoreboard"></div>
+          <button id="btnFullscreen" type="button" class="btn small" title="Fullscreen">⛶</button>
+          <button id="btnLeaveGame" class="btn small danger">Leave</button>
+        </div>
+        <!-- On mobile (.is-mobile), .game-body becomes a flex row: a control
+             column on each side, with #phaser-stage sized to the space left
+             over between them — so the arena is never covered by a touch
+             button, and never has to compete with them for the same pixels.
+             On desktop, .game-body is unstyled and .mc-col is hidden. -->
+        <div class="game-body" id="gameBody">
+          <div class="mc-col mc-col-left">
+            <!-- Drag to aim — replaces canvas-drag targeting on mobile. -->
+            <div class="mc-aim" id="aimPad">
+              <div class="mc-aim-base"><span class="mc-aim-hint">⊕</span></div>
+              <div class="mc-aim-knob" id="aimKnob"></div>
+            </div>
+            <div class="mc-move-row">
+              <button type="button" id="btnTouchLeft" class="mc-btn">◀</button>
+              <button type="button" id="btnTouchRight" class="mc-btn">▶</button>
+            </div>
+            <button type="button" id="btnTouchDash" class="mc-btn mc-dash">DASH</button>
+          </div>
+
+          <div id="phaser-stage">
+            <div id="phaser-container"></div>
+            <div id="weaponHud" class="weapon-hud hidden"></div>
+            <div id="localHudPanel" class="local-hud-panel hidden"></div>
+            <ul id="killFeed" class="kill-feed"></ul>
+            <div id="hitMarker" class="hit-marker"></div>
+            <div id="killBanner" class="kill-banner"></div>
+          </div>
+
+          <div class="mc-col mc-col-right">
+            <button type="button" id="btnTouchSwitch" class="mc-btn mc-switch">SW</button>
+            <button type="button" id="btnTouchJump" class="mc-btn mc-jump">▲</button>
+            <button type="button" id="btnTouchFire" class="mc-btn mc-fire">FIRE</button>
+          </div>
+        </div>
+        <p class="controls-hint">A/D move · W jump · Space dash · Mouse aim · Left Click attack · Q switch weapon</p>
+
+        <!-- Blocks the game screen on mobile until the device is rotated. -->
+        <div id="rotateOverlay" class="rotate-overlay">
+          <div class="rotate-icon">⟳</div>
+          <p>Rotate your device to landscape to play</p>
+        </div>
+      </section>
+
+      <!-- RESULTS -->
+      <section id="screen-results" class="screen">
+        <h1 id="resultsWinner">Winner</h1>
+        <p class="subtitle" id="resultsSub">Final standings</p>
+        <ol id="resultsStandings" class="results-standings"></ol>
+        <div class="button-row">
+          <button id="btnRematch" class="btn primary hidden">Rematch</button>
+          <button id="btnLeaveResults" class="btn danger">Leave</button>
+        </div>
+        <p id="resultsHint" class="hint"></p>
+      </section>
+    </div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
